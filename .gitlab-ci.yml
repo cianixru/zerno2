@@ -1,0 +1,84 @@
+# Стадии процесса сборки.
+stages:
+  - build
+  - docs
+  - docker-image
+  - deploy
+
+# Сборка приложения #
+application-building:
+  stage: build
+  image: node:16.14.0
+  rules:
+    - if: '(($CI_COMMIT_TITLE =~ /^Merge .*$/) && ($CI_COMMIT_BRANCH == "develop")) || ($CI_PIPELINE_SOURCE == "push")'
+  script:
+    - echo $CI_COMMIT_MESSAGE
+    - echo $CI_COMMIT_BRANCH
+    - echo $CI_PIPELINE_SOURCE
+    - npm install
+    - npx tsc
+    - node --experimental-specifier-resolution=node .result/scripts/building/copy-scripts-resources.script.js
+    - cp package-lock.json ./.result
+    - cd .result
+    - npm ci
+    - node --experimental-specifier-resolution=node scripts/building/resolve-mapped-paths.script.js
+    - cp -r ./node_modules ./applications/monolith/
+    - cp -r package.json ./applications/monolith/
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - .result/
+
+# Docs
+open-api-generation:
+  stage: docs
+  image: node:16.14.0
+  services:
+    - postgres:14.2
+  variables:
+    POSTGRES_HOST: postgres
+    POSTGRES_PORT: 5432
+    POSTGRES_USER: $PG_USER
+    POSTGRES_PASSWORD: $PG_PASS
+    POSTGRES_PASSWORD_PATH: postgres-password
+    POSTGRES_DB: $PG_DB
+    POSTGRES_DATABASE: $PG_DB
+  rules:
+    - if: '(($CI_COMMIT_TITLE =~ /^Merge .*$/) && ($CI_COMMIT_BRANCH == "develop"))' 
+  script:
+    - cd .result
+    - echo "$PG_PASS" > postgres-password
+    - node --experimental-specifier-resolution=node applications/monolith/generate-open-api.script.js
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - .result/
+
+image-building:
+  stage: docker-image
+  rules:
+    - if: '(($CI_COMMIT_TITLE =~ /^Merge .*$/) && ($CI_COMMIT_BRANCH == "develop"))'
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - tag="$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA"
+    - docker build --build-arg APPLICATION=monolith --pull -t "$CI_REGISTRY_IMAGE:${tag}" .
+    - docker push "$CI_REGISTRY_IMAGE:${tag}"
+  tags:
+    - backend
+
+deploy:
+  stage: deploy
+  rules:
+    - if: '(($CI_COMMIT_TITLE =~ /^Merge .*$/) && ($CI_COMMIT_BRANCH == "develop"))'
+  before_script:
+    - mkdir -p ~/.ssh
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY_DEPLOY" | ssh-add -
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - chmod 700 ~/.ssh
+  script:
+    - tag="$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA"
+    - scp .result/open-api.json root@10.10.10.21:/home/server/temp/
+    - ssh root@10.10.10.21 "/home/server/start.sh ${tag}"
+    - ssh root@10.10.10.21 "/home/server/init-open-api.sh"

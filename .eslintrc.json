@@ -1,0 +1,36 @@
+{
+    "root": true,
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": [
+            "./tsconfig.json"
+        ]
+    },
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "rules": {
+        "@typescript-eslint/comma-dangle": ["error", "always-multiline"],
+        "@typescript-eslint/comma-spacing": ["error", { "before": false, "after": true }],
+        "@typescript-eslint/indent": ["error", 4, {
+            "SwitchCase": 1,
+            "ignoredNodes": [
+                "FunctionExpression > .params[decorators.length > 0]",
+                "FunctionExpression > .params > :matches(Decorator, :not(:first-child))"
+            ]
+        }],
+        "@typescript-eslint/no-inferrable-types": ["off"],
+        "@typescript-eslint/no-namespace": ["off"],
+        "@typescript-eslint/object-curly-spacing": ["error", "always"],
+        "@typescript-eslint/semi": ["error"],
+        "@typescript-eslint/space-before-function-paren": ["error", "always"],
+        "camelcase": ["error", { "properties": "always" }],
+        "max-len": ["error", { "code": 140 }]
+    },
+    "ignorePatterns": [
+    ]
+}

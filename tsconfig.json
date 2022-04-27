@@ -1,0 +1,75 @@
+{
+    "compilerOptions": {
+        // Type Checking
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "strict": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "strictPropertyInitialization": false,
+
+        // Modules
+        "baseUrl": "./",
+        "module": "es2022",
+        "moduleResolution": "node",
+        "paths": {
+            "@zern/contract/*": ["contracts/*"],
+            "@zern/common": ["packages/common/"],
+            "@zern/nest": ["packages/nest/"],
+            "@zern/types": ["packages/types/"],
+        },
+        "resolveJsonModule": true,
+        "rootDir": "./",
+
+        // Emit
+        "declaration": true,
+        "newLine": "lf",
+        "outDir": ".result/",
+
+        // JavaScript Support
+
+        // Editor Support
+
+        // Interop Constraints
+        "esModuleInterop": true,
+
+        // Backwards Compatibility
+
+        // Language and Environment
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "target": "es2021",
+
+        // Compiler Diagnostics
+
+        // Projects
+
+        // Output Formatting
+
+        // Completeness
+
+        // <skip-lib-check>
+        //
+        // This is necessary for the correct operation of the tsc-watch
+        //
+        "skipLibCheck": true,
+        //
+        // </skip-lib-check>
+
+        // Command Line
+
+        // Watch Options
+    },
+
+    "include": [
+        "applications/",
+        "contracts/",
+        "packages/",
+        "scripts/",
+    ],
+
+    "exclude": [
+    ]
+}

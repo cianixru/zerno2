@@ -1,0 +1,11 @@
+# IDE's
+.idea/
+
+# Dependencies
+node_modules/
+
+# Environments
+**/*env
+
+# Building result
+.result/

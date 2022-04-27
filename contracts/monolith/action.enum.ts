@@ -1,0 +1,12 @@
+enum Action {
+    CREATE_SECRET_CODE,
+    CREATE_SESSION,
+    DELETE_SESSION,
+    DELETE_SESSIONS,
+    UPDATE_SESSION,
+
+    CREATE_USER,
+    UPLOAD_PROFILE_PICTURE,
+}
+
+export { Action };
